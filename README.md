@@ -1,1 +1,1 @@
-# keras-piecewise-pooling
+# Keras Piecewise Pooling
