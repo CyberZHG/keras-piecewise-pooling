@@ -31,7 +31,7 @@ class PiecewisePooling1D(keras.layers.Layer):
         inputs, positions = inputs
         return K.map_fn(
             lambda i: self._call_sample(inputs, positions, i),
-            K.arange(K.shape(inputs)[0], dtype='int32'),
+            K.arange(K.shape(inputs)[0]),
             dtype=K.floatx(),
         )
 
@@ -40,7 +40,7 @@ class PiecewisePooling1D(keras.layers.Layer):
         positions = positions[index]
         return K.map_fn(
             lambda i: self._call_piece(inputs, positions, i),
-            K.arange(self.piece_num, dtype='int32'),
+            K.arange(self.piece_num),
             dtype=K.floatx(),
         )
 
