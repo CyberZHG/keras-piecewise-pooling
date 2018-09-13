@@ -71,3 +71,12 @@ The layer is used for pooling sequential data with given slicing positions:
    # ]]
 
 ``PiecewisePooling1D`` has two input layers, the first is the layer to be processed, the second is the layer representing positions. The last column of the positions must be the lengths of the sequences.
+
+You can write your own pooling functions:
+
+.. code-block:: python
+
+   PiecewisePooling1D(
+       piece_num=piece_num,
+       pool_type=lambda x: K.min(x, axis=0),
+   )

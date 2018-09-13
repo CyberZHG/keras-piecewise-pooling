@@ -3,6 +3,7 @@ import tempfile
 import random
 import unittest
 import keras
+import keras.backend as K
 import numpy as np
 from keras_piecewise_pooling import PiecewisePooling1D
 
@@ -82,6 +83,27 @@ class TestPool1D(unittest.TestCase):
                 piece_num=3,
                 pool_type='not_implemented',
             )
+
+    def test_custom_pool(self):
+        data = [
+            [2, 3, 5, 7],
+            [2, 3, 5, 7],
+        ]
+        positions = [
+            [2, 4],
+            [3, 4],
+        ]
+        model = self._build_model(
+            input_shape=(None,),
+            piece_num=len(positions[0]),
+            pool_type=lambda x: K.min(x, axis=0),
+        )
+        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
+        expected = [
+            [2.0, 5.0],
+            [2.0, 7.0],
+        ]
+        self.assertEqual(expected, predicts)
 
     def test_save_load(self):
         data = [[[1, 5, 2, 4], [7, 9, 2, 3], [0, 1, 7, 2], [4, 8, 2, 5]]]
