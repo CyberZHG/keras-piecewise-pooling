@@ -59,6 +59,22 @@ class TestPool1D(unittest.TestCase):
         ]]
         self.assertEqual(expected, predicts)
 
+    def test_empty_interval(self):
+        data = [[[1, 3, 2, 5], [7, 4, 2, 3], [0, 1, 2, 2], [4, 7, 2, 5]]]
+        positions = [[2, 2, 4]]
+        model = self._build_model(
+            input_shape=(None, None),
+            piece_num=len(positions[0]),
+            pool_type=PiecewisePooling1D.POOL_TYPE_MAX,
+        )
+        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
+        expected = [[
+            [7.0, 4.0, 2.0, 5.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [4.0, 7.0, 2.0, 5.0],
+        ]]
+        self.assertEqual(expected, predicts)
+
     def test_not_implemented(self):
         with self.assertRaises(NotImplementedError):
             self._build_model(

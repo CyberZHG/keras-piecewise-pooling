@@ -50,12 +50,22 @@ class PiecewisePooling1D(keras.layers.Layer):
             inputs[:positions[index]],
             inputs[positions[index - 1]:positions[index]],
         )
+        return K.switch(
+            K.equal(K.shape(piece)[0], 0),
+            self._pool_empty(inputs),
+            self._pool_type(piece),
+        )
+
+    def _pool_empty(self, inputs):
+        return K.zeros(K.shape(inputs)[1:])
+
+    def _pool_type(self, piece):
         if self.pool_type == self.POOL_TYPE_MAX:
             return K.max(piece, axis=0)
         if self.pool_type == self.POOL_TYPE_AVERAGE:
             print(piece)
             return K.sum(piece, axis=0) / K.cast(K.shape(piece)[0], K.floatx())
-        raise NotImplementedError('No implementation for poooling type : ' + self.pool_type)
+        raise NotImplementedError('No implementation for pooling type : ' + self.pool_type)
 
     def compute_output_shape(self, input_shape):
         return (input_shape[0][0], self.piece_num) + tuple(input_shape[0][2:])
