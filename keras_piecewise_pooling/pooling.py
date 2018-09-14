@@ -45,11 +45,7 @@ class PiecewisePooling1D(keras.layers.Layer):
         )
 
     def _call_piece(self, inputs, positions, index):
-        piece = K.switch(
-            K.equal(index, 0),
-            inputs[:positions[index]],
-            inputs[positions[index - 1]:positions[index]],
-        )
+        piece = inputs[K.switch(K.equal(index, 0), 0, positions[index - 1]):positions[index]]
         return K.switch(
             K.equal(K.shape(piece)[0], 0),
             lambda: self._pool_empty(inputs),

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='keras-piecewise-pooling',
-    version='0.5',
+    version='0.6',
     packages=['keras_piecewise_pooling'],
     url='https://github.com/CyberZHG/keras-piecewise-pooling',
     license='MIT',
