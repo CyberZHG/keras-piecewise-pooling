@@ -1,71 +1,67 @@
 import keras
 import keras.backend as K
+from keras_piecewise import Piecewise
 
 
-class PiecewisePooling1D(keras.layers.Layer):
+class MaxPool1D(keras.layers.Layer):
+
+    def __init__(self, **kwargs):
+        super(MaxPool1D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        return K.max(inputs, axis=1)
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0],) + input_shape[1:]
+
+
+class AvePool1D(keras.layers.Layer):
+
+    def __init__(self, **kwargs):
+        super(AvePool1D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        return K.sum(inputs, axis=1) / (K.cast(K.shape(inputs)[1], K.floatx()) + K.epsilon())
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0],) + input_shape[1:]
+
+
+class PiecewisePooling1D(Piecewise):
 
     POOL_TYPE_MAX = 'max'
     POOL_TYPE_AVERAGE = 'average'
 
     def __init__(self,
-                 piece_num,
                  pool_type=POOL_TYPE_MAX,
                  **kwargs):
-        self.piece_num = piece_num
         self.pool_type = pool_type
+        if callable(self.pool_type):
+            layer = keras.layers.Lambda(self.pool_type)
+        elif pool_type == self.POOL_TYPE_MAX:
+            layer = MaxPool1D()
+        elif pool_type == self.POOL_TYPE_AVERAGE:
+            layer = AvePool1D()
+        else:
+            raise NotImplementedError('No implementation for pooling type : ' + pool_type)
         self.supports_masking = True
-        super(PiecewisePooling1D, self).__init__(**kwargs)
+        super(PiecewisePooling1D, self).__init__(layer, **kwargs)
 
     def get_config(self):
         config = {
-            'piece_num': self.piece_num,
             'pool_type': self.pool_type,
         }
         base_config = super(PiecewisePooling1D, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-    def build(self, input_shape):
-        super(PiecewisePooling1D, self).build(input_shape)
+    @classmethod
+    def from_config(cls, config, custom_objects=None):
+        config.pop('layer')
+        return cls(**config)
 
-    def call(self, inputs, mask=None, **kwargs):
-        inputs, positions = inputs
-        return K.map_fn(
-            lambda i: self._call_sample(inputs, positions, i),
-            K.arange(K.shape(inputs)[0]),
-            dtype=K.floatx(),
-        )
-
-    def _call_sample(self, inputs, positions, index):
-        inputs = inputs[index]
-        positions = positions[index]
-        return K.map_fn(
-            lambda i: self._call_piece(inputs, positions, i),
-            K.arange(self.piece_num),
-            dtype=K.floatx(),
-        )
-
-    def _call_piece(self, inputs, positions, index):
-        piece = inputs[K.switch(K.equal(index, 0), 0, positions[index - 1]):positions[index]]
-        return K.switch(
-            K.equal(K.shape(piece)[0], 0),
-            lambda: self._pool_empty(inputs),
-            lambda: self._pool_type(piece),
-        )
-
-    def _pool_empty(self, piece):
-        return K.zeros_like(K.max(piece, axis=0))
-
-    def _pool_type(self, piece):
-        if callable(self.pool_type):
-            return self.pool_type(piece)
-        if self.pool_type == self.POOL_TYPE_MAX:
-            return K.max(piece, axis=0)
-        if self.pool_type == self.POOL_TYPE_AVERAGE:
-            return K.sum(piece, axis=0) / K.cast(K.shape(piece)[0], K.floatx())
-        raise NotImplementedError('No implementation for pooling type : ' + self.pool_type)
-
-    def compute_output_shape(self, input_shape):
-        return (input_shape[0][0], self.piece_num) + tuple(input_shape[0][2:])
-
-    def compute_mask(self, inputs, mask=None):
-        return None
+    @staticmethod
+    def get_custom_objects():
+        return {
+            'Piecewise': Piecewise,
+            'PiecewisePooling1D': PiecewisePooling1D,
+        }

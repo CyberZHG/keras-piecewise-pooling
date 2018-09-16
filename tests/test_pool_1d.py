@@ -15,7 +15,6 @@ class TestPool1D(unittest.TestCase):
         data_input = keras.layers.Input(shape=input_shape)
         position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
         pool_layer = PiecewisePooling1D(
-            piece_num=piece_num,
             pool_type=pool_type,
         )([data_input, position_input])
         model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
@@ -52,13 +51,13 @@ class TestPool1D(unittest.TestCase):
             piece_num=len(positions[0]),
             pool_type=PiecewisePooling1D.POOL_TYPE_AVERAGE,
         )
-        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
-        expected = [[
+        predicts = model.predict([np.asarray(data), np.asarray(positions)])
+        expected = np.asarray([[
             [1.0, 3.0, 2.0, 5.0],
             [3.5, 5.0, 4.5, 2.5],
             [4.0, 7.0, 2.0, 5.0],
-        ]]
-        self.assertEqual(expected, predicts)
+        ]])
+        self.assertTrue(np.allclose(expected, predicts))
 
     def test_empty_interval(self):
         data = [[[1, 3, 2, 5], [7, 4, 2, 3], [0, 1, 2, 2], [4, 7, 2, 5]]]
@@ -71,7 +70,7 @@ class TestPool1D(unittest.TestCase):
         predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
         expected = [[
             [7.0, 4.0, 2.0, 5.0],
-            [0.0, 0.0, 0.0, 0.0],
+            [float('-inf')] * 4,
             [4.0, 7.0, 2.0, 5.0],
         ]]
         self.assertEqual(expected, predicts)
@@ -96,7 +95,7 @@ class TestPool1D(unittest.TestCase):
         model = self._build_model(
             input_shape=(None,),
             piece_num=len(positions[0]),
-            pool_type=lambda x: K.min(x, axis=0),
+            pool_type=lambda x: K.min(x, axis=1),
         )
         predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
         expected = [
@@ -115,10 +114,10 @@ class TestPool1D(unittest.TestCase):
         )
         model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % random.random())
         model.save(model_path)
-        model = keras.models.load_model(model_path, custom_objects={'PiecewisePooling1D': PiecewisePooling1D})
-        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
-        expected = [[
+        model = keras.models.load_model(model_path, custom_objects=PiecewisePooling1D.get_custom_objects())
+        predicts = model.predict([np.asarray(data), np.asarray(positions)])
+        expected = np.asarray([[
             [4.0, 7.0, 2.0, 3.5],
             [2.0, 4.5, 4.5, 3.5],
-        ]]
-        self.assertEqual(expected, predicts)
+        ]])
+        self.assertTrue(np.allclose(expected, predicts))

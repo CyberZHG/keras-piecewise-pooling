@@ -33,11 +33,11 @@ Install
 
    pip install keras-piecewise-pooling
 
-Layers
-------
-
 ``PiecewisePooling1D``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
+
+Basic
+^^^^^
 
 The layer is used for pooling sequential data with given slicing positions:
 
@@ -54,29 +54,35 @@ The layer is used for pooling sequential data with given slicing positions:
 
    data_input = keras.layers.Input(shape=(None, None))
    position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
-   pool_layer = PiecewisePooling1D(
-       piece_num=piece_num,
-       pool_type=PiecewisePooling1D.POOL_TYPE_AVERAGE,
-   )([data_input, position_input])
+   pool_layer = PiecewisePooling1D(pool_type=PiecewisePooling1D.POOL_TYPE_AVERAGE)([data_input, position_input])
    model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
    model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)
    model.summary()
 
    print(model.predict([np.asarray(data), np.asarray(positions)]).tolist())
-   # The result will be:
+   # The result will be close to:
    # [[
-         [1.0, 3.0, 2.0, 5.0],
-         [3.5, 5.0, 4.5, 2.5],
-         [4.0, 7.0, 2.0, 5.0],
+   #     [1.0, 3.0, 2.0, 5.0],
+   #     [3.5, 5.0, 4.5, 2.5],
+   #     [4.0, 7.0, 2.0, 5.0],
    # ]]
 
 ``PiecewisePooling1D`` has two input layers, the first is the layer to be processed, the second is the layer representing positions. The last column of the positions must be the lengths of the sequences.
+
+Custom
+^^^^^^
 
 You can write your own pooling functions:
 
 .. code-block:: python
 
-   PiecewisePooling1D(
-       piece_num=piece_num,
-       pool_type=lambda x: K.min(x, axis=0),
-   )
+   PiecewisePooling1D(pool_type=lambda x: K.min(x, axis=1))
+
+Load
+^^^^
+
+Remember to set ``custom_objects``\ :
+
+.. code-block:: python
+
+   keras.models.load_model(model_path, custom_objects=PiecewisePooling1D.get_custom_objects())
