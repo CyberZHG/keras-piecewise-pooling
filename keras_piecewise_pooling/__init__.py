@@ -1,1 +1,1 @@
-from .pooling import PiecewisePooling1D
+from .pooling import PiecewisePooling1D, PiecewisePooling2D

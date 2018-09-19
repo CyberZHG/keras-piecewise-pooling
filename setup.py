@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='keras-piecewise-pooling',
-    version='0.7',
+    version='0.9',
     packages=['keras_piecewise_pooling'],
     url='https://github.com/CyberZHG/keras-piecewise-pooling',
     license='MIT',
@@ -12,7 +12,7 @@ setup(
     long_description=open('README.rst', 'r').read(),
     install_requires=[
         'numpy',
-        'keras',
+        'Keras',
         'keras-piecewise',
     ],
     classifiers=(
