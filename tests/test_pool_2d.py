@@ -8,7 +8,7 @@ import numpy as np
 from keras_piecewise_pooling import PiecewisePooling2D
 
 
-class TestPool1D(unittest.TestCase):
+class TestPool2D(unittest.TestCase):
 
     @staticmethod
     def _build_model(input_shape, row_num, col_num, pool_type):
