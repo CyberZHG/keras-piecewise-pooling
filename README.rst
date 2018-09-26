@@ -86,3 +86,8 @@ Remember to set ``custom_objects``\ :
 .. code-block:: python
 
    keras.models.load_model(model_path, custom_objects=PiecewisePooling1D.get_custom_objects())
+
+Tip
+^^^
+
+You'll get ``-inf`` values if you have empty intervals in the default max pooling setting. Activation layers like ReLU will help preventing ``nan`` losses.

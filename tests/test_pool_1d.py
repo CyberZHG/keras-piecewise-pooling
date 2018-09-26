@@ -11,11 +11,12 @@ from keras_piecewise_pooling import PiecewisePooling1D
 class TestPool1D(unittest.TestCase):
 
     @staticmethod
-    def _build_model(input_shape, piece_num, pool_type):
+    def _build_model(input_shape, piece_num, pool_type, pos_type=PiecewisePooling1D.POS_TYPE_SEGMENTS):
         data_input = keras.layers.Input(shape=input_shape)
         position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
         pool_layer = PiecewisePooling1D(
             pool_type=pool_type,
+            pos_type=pos_type,
         )([data_input, position_input])
         model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
         model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)
@@ -40,6 +41,18 @@ class TestPool1D(unittest.TestCase):
         expected = [
             [3.0, 5.0],
             [5.0, 2.0],
+        ]
+        self.assertEqual(expected, predicts)
+        model = self._build_model(
+            input_shape=(None,),
+            piece_num=len(positions[0]),
+            pool_type=PiecewisePooling1D.POOL_TYPE_MAX,
+            pos_type=PiecewisePooling1D.POS_TYPE_PAIRS,
+        )
+        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
+        expected = [
+            [5.0],
+            [2.0],
         ]
         self.assertEqual(expected, predicts)
 

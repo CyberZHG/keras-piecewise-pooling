@@ -1,4 +1,4 @@
 numpy
 tensorflow
 Keras
-keras-piecewise
+keras-piecewise==0.10
