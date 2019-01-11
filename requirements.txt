@@ -1,4 +1,3 @@
 numpy
-tensorflow
 Keras
-keras-piecewise==0.11.0
+keras-piecewise==0.12.0
