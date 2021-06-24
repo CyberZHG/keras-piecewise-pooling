@@ -1,8 +1,9 @@
 # Keras Piecewise Pooling
 
-[![Travis](https://travis-ci.org/CyberZHG/keras-piecewise-pooling.svg)](https://travis-ci.org/CyberZHG/keras-piecewise-pooling)
+[![Travis](https://travis-ci.com/CyberZHG/keras-piecewise-pooling.svg)](https://travis-ci.org/CyberZHG/keras-piecewise-pooling)
 [![Coverage](https://coveralls.io/repos/github/CyberZHG/keras-piecewise-pooling/badge.svg?branch=master)](https://coveralls.io/github/CyberZHG/keras-piecewise-pooling)
-[![PyPI](https://img.shields.io/pypi/pyversions/keras-piecewise-pooling.svg)](https://pypi.org/project/keras-piecewise-pooling/)
+
+**This repo is outdated and will no longer be maintained.**
 
 Piecewise pooling layer in Keras.
 
@@ -11,7 +12,7 @@ Piecewise pooling layer in Keras.
 ## Install
 
 ```bash
-pip install keras-piecewise-pooling
+pip install git+https://github.com/cyberzhg/keras-piecewise-pooling.git
 ```
 
 ## `PiecewisePooling1D`
